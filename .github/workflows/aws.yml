@@ -36,6 +36,15 @@ jobs:
     
      - name: Push to the DockerHub
        run: docker push mastermole/my_website:${{ steps.version-generator.outputs.ARTEFACT_VERSION }}
+       
+     - name: executing remote ssh commands using ssh key
+       uses: ./
+       with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        script: whoami  
       
      - name: Docker pull and run from Docker Hub
        uses: appleboy/ssh-action@master
