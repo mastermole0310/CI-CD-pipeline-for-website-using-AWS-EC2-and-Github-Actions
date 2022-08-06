@@ -41,7 +41,17 @@ jobs:
      - name: Docker pull and run from Docker Hub
        uses: appleboy/ssh-action@master
        with:
-          env: |
+         port: 22
+         sync: false
+         use_insecure_cipher: false
+         timeout: 30s
+         command_timeout: 10m
+         proxy_port: 22
+         proxy_timeout: 30s
+         proxy_use_insecure_cipher: false
+         script_stop: false
+         debug: false
+         env: |
              port: 22
              sync: false
              use_insecure_cipher: false
@@ -54,7 +64,7 @@ jobs:
              debug: false
              HOSTNAME : ${{ secrets.HOSTNAME  }}
              USER_NAME : ${{ secrets.USER_NAME  }}
-          scripts: |
+         scripts: |
            docker login
            docker pull mastermole/my_website:${{ steps.version-generator.outputs.ARTEFACT_VERSION }}
            docker stop website
