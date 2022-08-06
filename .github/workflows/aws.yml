@@ -51,13 +51,17 @@ jobs:
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
             echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
             
-        
-     - uses: actions/checkout@v2
-       name: Deploy in EC2
+            
+     - name: Docker pull and run from Amazon ECR
        env:
             PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY  }}
             HOSTNAME : ${{ secrets.HOSTNAME  }}
             USER_NAME : ${{ secrets.USER_NAME  }}
+            scripts: |
+              docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+              docker run -d -p 8081:80 --name my_website $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            
+     
             
      
             
