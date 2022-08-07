@@ -49,7 +49,6 @@ jobs:
                docker login
                docker pull mastermole/my_website:${{ steps.version-generator.outputs.ARTEFACT_VERSION }}
                docker stop website
-               docker rm website
                docker run -d -p 8081:80 --name website mastermole/my_website:${{ steps.version-generator.outputs.ARTEFACT_VERSION }} 
            
                            
