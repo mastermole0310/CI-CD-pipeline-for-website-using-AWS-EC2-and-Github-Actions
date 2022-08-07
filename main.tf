@@ -14,6 +14,26 @@ terraform {
   required_version = ">= 0.14.9"
 }
 
+variable "domain" {
+  default = "es2smirnov"
+  type = string
+}
+
+variable "domain_name" {
+  default = "es2smirnov.com"
+  type = string
+}
+
+variable "record_name" {
+  default = "www"
+  type = string
+}
+
+variable "key_name" {
+  default = "aws_key"
+  type = string
+}
+
 provider "aws" {
   #profile = "default"
   region  = "us-east-2"
@@ -23,12 +43,12 @@ locals {
   private_key=file("C:/Users/алексей/Desktop/alexs.pem")
 }
 
+
 resource "aws_instance" "main_server" {
   ami                    = "ami-0eea504f45ef7a8f7"
   availability_zone = "us-east-2c"
   instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.mywebserver.id]
-
 
     connection {
       type     = "ssh"
@@ -38,8 +58,6 @@ resource "aws_instance" "main_server" {
     } 
 
      user_data = file("userdata.sh")
-
-
 
   key_name = "alexs"
   tags = {
@@ -164,4 +182,30 @@ resource "aws_alb_target_group_attachment" "ec-2_attach" {
   count = length(aws_instance.main_server)
   target_group_arn = "${aws_lb_target_group.my_target_group.arn}"
   target_id = "${aws_instance.main_server.id}"
+}
+
+
+resource "aws_acm_certificate" "my_acm_certificate" {
+  domain_name = "liver.com"
+  subject_alternative_names = ["*.liver.com"]
+  validation_method = "DNS"
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+data "aws_route53_zone" "private_zone" {
+  name = "liver.com"
+  private_zone = false
+
+}
+resource "aws_route53_record" "my_validation" {
+  zone_id = data.aws_route53_zone.private_zone.zone_id
+  name = var.record_name
+  type = "A"
+  
+  alias {
+    name = aws_lb.my_aws_alb.dns_name
+    zone_id = "${aws_lb.my_aws_alb.zone_id}"
+    evaluate_target_health = true
+  }
 }
