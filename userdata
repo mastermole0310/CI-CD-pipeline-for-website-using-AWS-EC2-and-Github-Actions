@@ -1,16 +1,7 @@
 #!/bin/bash
-# Обновление сервера
 apt-get update
 apt upgrade -y
-# Установка jq
-apt install jq -y
-# Установка ssh подключения
-apt install openssh-server -y
-# Установка docker
 apt install docker.io -y 
-# Запуск docker deamon
 systemctl start docker
-# Создание (добавление) группы docker 
 groupadd docker
-# Добавление пользователя ec2-user в группу docker
 usermod -aG docker ubuntu
