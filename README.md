@@ -11,8 +11,13 @@
 - Авторизоваться в AWS Amazon на вашем компьютере с помощью AWS CLI (https://cloudacademy.com/blog/how-to-use-aws-cli/)
 - Выполнить команду terraform apply в Visual Studio Code на вашем компьютере
 - Terraform создаст инстанс (main_server) на основе Linux Ubuntu, с установленным Docker
+- Создаем репозиторий на Dockerhub
 - Заходим в наш репозиторий на Github и создаем новый Acnions
 - Копируем содержимое файла aws.yml в ваш workflow
+- Actions создаст CI/CD pipeline для деплоя вашего приложения в AWS EC2
+- Далее заходим в ваш аккаунт AWS → Route 53 → Hosted zones → Record name
+- Выбираем Record name (например www.domain-name.com) и выбираем его значение
+- Вводим его в браузер и на экране увидим надпись "Hello, world"
 ## ==АВТОР==
 - Smirnov Alexey
 
