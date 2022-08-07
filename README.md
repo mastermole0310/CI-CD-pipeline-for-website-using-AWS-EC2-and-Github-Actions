@@ -12,12 +12,16 @@
 - Выполнить команду terraform apply в Visual Studio Code на вашем компьютере
 - Terraform создаст инстанс (main_server) на основе Linux Ubuntu, с установленным Docker
 - Создаем репозиторий на Dockerhub
-- Заходим в наш репозиторий на Github и создаем новый Acnions
+- Заходим в наш репозиторий на Github и в Secrets создаем AWS_PRIVATE_KEY, DOCKERHUB_ACCESS_TOKEN, DOCKER_USERNAME, HOSTNAME (AWS), PORT (AWS), USER_NAME (AWS)
+- Далее создаем новый Actions
 - Копируем содержимое файла aws.yml в ваш workflow
 - Actions создаст CI/CD pipeline для деплоя вашего приложения в AWS EC2
 - Далее заходим в ваш аккаунт AWS → Route 53 → Hosted zones → Record name
 - Выбираем Record name (например www.domain-name.com) и выбираем его значение
 - Вводим его в браузер и на экране увидим надпись "Hello, world"
+
+## ==Примечание==
+Domain name был создан вручную 
 ## ==АВТОР==
 - Smirnov Alexey
 
