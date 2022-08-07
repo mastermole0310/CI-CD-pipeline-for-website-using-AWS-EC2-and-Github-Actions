@@ -23,7 +23,7 @@
 ![website](https://user-images.githubusercontent.com/95876810/183314382-89fa82c0-ba2a-466c-87d0-b8204ce8254d.jpg)
 
 ## ==Примечание==
-Domain name был создан вручную  в виду возможности обновления провайдера Terraform AWS (даже с использованием VPN) (https://github.com/hashicorp/terraform/issues/24082)
+Domain name был создан вручную  в виду невозможности обновления провайдера Terraform AWS (даже с использованием VPN) (https://github.com/hashicorp/terraform/issues/24082)
 ## ==АВТОР==
 - Smirnov Alexey
 
