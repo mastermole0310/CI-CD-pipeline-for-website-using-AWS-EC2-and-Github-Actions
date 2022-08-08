@@ -7,7 +7,7 @@
 - Аккаунт на DockerHub (https://hub.docker.com/)
 - Аккаунт на GitHub (https://github.com/)
 ## ==Подготовка к работе и запуск==
-- Клонировать данный репозиторий (https://github.com/mastermole0310/test_task) в Visual Studio Code на свой компьютер и в ваш репозиторий на Github
+- Клонировать данный [репозиторий](https://github.com/mastermole0310/CI-CD-pipeline-for-website-using-AWS-EC2-and-Github-Actions)
 - Авторизоваться в AWS Amazon на вашем компьютере с помощью AWS CLI (https://cloudacademy.com/blog/how-to-use-aws-cli/)
 - Выполнить команду terraform apply в Visual Studio Code на вашем компьютере
 - Terraform создаст инстанс (main_server) на основе Linux Ubuntu, с установленным Docker
@@ -26,4 +26,3 @@
 Domain name был создан вручную  в виду невозможности обновления провайдера Terraform AWS (даже с использованием VPN) (https://github.com/hashicorp/terraform/issues/24082)
 ## ==АВТОР==
 - Smirnov Alexey
-
