@@ -14,20 +14,6 @@ terraform {
   required_version = ">= 0.14.9"
 }
 
-variable "domain" {
-  default = "es2smirnov"
-  type = string
-}
-
-variable "domain_name" {
-  default = "es2smirnov.com"
-  type = string
-}
-
-variable "record_name" {
-  default = "www"
-  type = string
-}
 
 variable "key_name" {
   default = "aws_key"
@@ -39,8 +25,17 @@ provider "aws" {
   region  = "us-east-2"
 }
 
-locals {
-  private_key=file("C:/Users/алексей/Desktop/alexs.pem")
+resource "tls_private_key" "my_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "generated_key" {
+  key_name   = var.key_name
+  public_key = tls_private_key.my_key.public_key_openssh
+  provisioner "local-exec" { 
+    command = "echo '${tls_private_key.my_key.private_key_pem}' > C:/Users/алексей/Desktop/myKey.pem"
+  }
 }
 
 
@@ -54,12 +49,13 @@ resource "aws_instance" "main_server" {
       type     = "ssh"
       user     = "ubuntu"
       host = self.public_ip
-      private_key = local.private_key
+      private_key = tls_private_key.my_key.private_key_pem
     } 
 
      user_data = file("userdata.sh")
 
-  key_name = "alexs"
+  key_name = var.key_name
+
   tags = {
     Name = "main_server"
   }
@@ -117,20 +113,7 @@ resource "aws_security_group" "mywebserver" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   
-  ingress {
-    from_port   = 8081
-    to_port     = 8081
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
+  
 }
 
 data "aws_subnet_ids" "subnet" {
@@ -202,10 +185,15 @@ resource "aws_route53_record" "my_validation" {
   zone_id = data.aws_route53_zone.private_zone.zone_id
   name = var.record_name
   type = "A"
-  
+
   alias {
     name = aws_lb.my_aws_alb.dns_name
     zone_id = "${aws_lb.my_aws_alb.zone_id}"
     evaluate_target_health = true
   }
+}
+
+output "private_key" {
+  value     = tls_private_key.my_key.private_key_pem
+  sensitive = true
 }
