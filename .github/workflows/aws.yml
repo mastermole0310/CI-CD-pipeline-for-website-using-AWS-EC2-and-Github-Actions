@@ -45,6 +45,7 @@ jobs:
              user_name : ${{ secrets.USER_NAME  }}
              key: ${{ secrets.AWS_PRIVATE_KEY  }}
              port: ${{ secrets.PORT  }}
+             debug: true
              scripts: |
                docker login
                docker pull mastermole/my_website:${{ steps.version-generator.outputs.ARTEFACT_VERSION }}
