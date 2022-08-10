@@ -43,13 +43,13 @@ jobs:
        with:
              hostname : ${{ secrets.HOSTNAME  }}
              user_name : ${{ secrets.USER_NAME  }}
-             private_key: ${{ secrets.AWS_PRIVATE_KEY  }}
+             key: ${{ secrets.AWS_PRIVATE_KEY  }}
              port: ${{ secrets.PORT  }}
              scripts: |
                docker login
                docker pull mastermole/my_website:${{ steps.version-generator.outputs.ARTEFACT_VERSION }}
                docker stop website
-               docker run -d -p 8081:80 --name website mastermole/my_website:${{ steps.version-generator.outputs.ARTEFACT_VERSION }} 
+               docker run -d -p 80:80 --name website mastermole/my_website:${{ steps.version-generator.outputs.ARTEFACT_VERSION }} 
            
                            
          
