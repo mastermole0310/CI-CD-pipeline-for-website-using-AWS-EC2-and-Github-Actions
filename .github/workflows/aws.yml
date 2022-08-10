@@ -45,7 +45,8 @@ jobs:
              username : ${{ secrets.USER_NAME  }}
              key: ${{ secrets.AWS_PRIVATE_KEY }}
              port: ${{ secrets.PORT }}
-             scripts: docker run -d -p 80:80 --name website mastermole/my_website:${{ steps.version-generator.outputs.ARTEFACT_VERSION }} 
+             script: echo devuser 
+                             
            
                            
          
