@@ -43,7 +43,7 @@ jobs:
        with:
              host : ${{ secrets.HOSTNAME  }}
              username : ${{ secrets.USER_NAME  }}
-             password: ${{ secrets.PASSWORD }}
+             key: ${{ secrets.AWS_PRIVATE_KEY }}
              port: ${{ secrets.PORT }}
              debug: true
              scripts: |
