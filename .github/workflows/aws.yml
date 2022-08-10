@@ -39,11 +39,11 @@ jobs:
        
            
      - name: Docker pull and run from Docker Hub
-       uses: appleboy/ssh-action@v0.1.4
+       uses: appleboy/ssh-action@master
        with:
              host : ${{ secrets.HOSTNAME  }}
              username : ${{ secrets.USER_NAME  }}
-             key: ${{ secrets.AWS_PRIVATE_KEY  }}
+             password: ${{ secrets.PASSWORD }}
              port: ${{ secrets.PORT }}
              debug: true
              scripts: |
