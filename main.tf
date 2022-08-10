@@ -188,25 +188,20 @@ data "aws_route53_zone" "private_zone" {
 }
 
 
-resource "aws_route53_record" "my_validation" {
-  allow_overwrite = true
-  zone_id = data.aws_route53_zone.private_zone.zone_id
-  name    = var.record_name
-  type    = "A"
+resource "aws_route53_record" "cert-validations" {
+  count = length(aws_acm_certificate.my_acm_certificate.domain_validation_options)
 
-  alias {
-    name                   = aws_lb.my_aws_alb.dns_name
-    zone_id                = aws_lb.my_aws_alb.zone_id
-    evaluate_target_health = true
-  }
+  zone_id = data.aws_route53_zone.private_zone.zone_id
+  name    = element(aws_acm_certificate.my_acm_certificate.domain_validation_options.*.resource_record_name, count.index)
+  type    = element(aws_acm_certificate.my_acm_certificate.domain_validation_options.*.resource_record_type, count.index)
+  records = [element(aws_acm_certificate.my_acm_certificate.domain_validation_options.*.resource_record_value, count.index)]
+  ttl     = 60
 }
 
 
 resource "aws_acm_certificate_validation" "acm_certificate_validation" {
   certificate_arn = aws_acm_certificate.my_acm_certificate.arn
-  validation_record_fqdns = [
-    "${aws_route53_record.my_validation.fqdn}",
-  ]
+  validation_record_fqdns = aws_route53_record.cert-validations.*.fqdn
 }
 output "private_key" {
   value     = tls_private_key.my_key.private_key_pem
