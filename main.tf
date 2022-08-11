@@ -20,31 +20,26 @@ variable "key_name" {
   type    = string
 }
 
-variable "record_name" {
-  default = "my_record_name"
-  type    = string
-}
 
 provider "aws" {
   #profile = "default"
   region = "us-east-2"
 }
 
-resource "tls_private_key" "my_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
+resource "tls_private_key" "key" {
+  algorithm = "ED25519"
 }
 
 resource "aws_key_pair" "generated_key" {
   key_name   = var.key_name
-  public_key = tls_private_key.my_key.public_key_openssh
+  public_key = tls_private_key.key.public_key_openssh
   provisioner "local-exec" {
-    command = "echo '${tls_private_key.my_key.private_key_pem}' > C:/Users/алексей/Desktop/myKey.pem"
+    command = "echo '${tls_private_key.key.private_key_pem}' > C:/Users/алексей/Desktop/myKey.pem"
   }
 }
 
 
-resource "aws_instance" "main_server" {
+resource "aws_instance" "server" {
   ami                    = "ami-0eea504f45ef7a8f7"
   availability_zone      = "us-east-2c"
   instance_type          = "t2.micro"
@@ -54,7 +49,7 @@ resource "aws_instance" "main_server" {
     type        = "ssh"
     user        = "ubuntu"
     host        = self.public_ip
-    private_key = tls_private_key.my_key.private_key_pem
+    private_key = tls_private_key.key.private_key_pem
   }
 
   user_data = file("userdata.sh")
@@ -62,7 +57,7 @@ resource "aws_instance" "main_server" {
   key_name = var.key_name
 
   tags = {
-    Name = "main_server"
+    Name = "server"
   }
 }
 
@@ -125,7 +120,7 @@ data "aws_subnet_ids" "subnet" {
   vpc_id = aws_default_vpc.default.id
 }
 
-resource "aws_lb_target_group" "my_target_group" {
+resource "aws_lb_target_group" "target_group" {
   health_check {
     interval            = 10
     path                = "/"
@@ -135,14 +130,14 @@ resource "aws_lb_target_group" "my_target_group" {
     unhealthy_threshold = 2
   }
 
-  name        = "my-test-tg"
+  name        = "tg"
   port        = 80
   protocol    = "HTTP"
   target_type = "instance"
   vpc_id      = aws_default_vpc.default.id
 }
 
-resource "aws_lb" "my_aws_alb" {
+resource "aws_lb" "aws_alb" {
   name     = "my-aws-alb"
   internal = false
   security_groups = [
@@ -150,30 +145,47 @@ resource "aws_lb" "my_aws_alb" {
   ]
   subnets = data.aws_subnet_ids.subnet.ids
   tags = {
-    name = "test_alb"
+    name = "alb"
   }
   ip_address_type    = "ipv4"
   load_balancer_type = "application"
 }
 
-resource "aws_lb_listener" "test_lb_listener" {
-  load_balancer_arn = aws_lb.my_aws_alb.arn
+resource "aws_lb_listener" "lb_listener_http" {
+  load_balancer_arn = aws_lb.aws_alb.arn
   port              = 80
   protocol          = "HTTP"
   default_action {
-    target_group_arn = aws_lb_target_group.my_target_group.arn
+    target_group_arn = aws_lb_target_group.target_group.arn
+     type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+resource "aws_lb_listener" "lb_listener_https" {
+  load_balancer_arn = aws_lb.aws_alb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  certificate_arn   = aws_acm_certificate.acm_certificate.arn
+  default_action {
+    target_group_arn = aws_lb_target_group.target_group.arn
     type             = "forward"
   }
 }
 
 resource "aws_alb_target_group_attachment" "ec-2_attach" {
-  count            = length(aws_instance.main_server)
-  target_group_arn = aws_lb_target_group.my_target_group.arn
-  target_id        = aws_instance.main_server.id
+  count            = length(aws_instance.server)
+  target_group_arn = aws_lb_target_group.target_group.arn
+  target_id        = aws_instance.server.id
 }
 
 
-resource "aws_acm_certificate" "my_acm_certificate" {
+resource "aws_acm_certificate" "acm_certificate" {
   domain_name       = "dribble-getup.online"
   validation_method = "DNS"
   lifecycle {
@@ -189,21 +201,32 @@ data "aws_route53_zone" "private_zone" {
 
 
 resource "aws_route53_record" "cert-validations" {
-  count = length(aws_acm_certificate.my_acm_certificate.domain_validation_options)
+  count = length(aws_acm_certificate.acm_certificate.domain_validation_options)
 
   zone_id = data.aws_route53_zone.private_zone.zone_id
-  name    = element(aws_acm_certificate.my_acm_certificate.domain_validation_options.*.resource_record_name, count.index)
-  type    = element(aws_acm_certificate.my_acm_certificate.domain_validation_options.*.resource_record_type, count.index)
-  records = [element(aws_acm_certificate.my_acm_certificate.domain_validation_options.*.resource_record_value, count.index)]
+  name    = element(aws_acm_certificate.acm_certificate.domain_validation_options.*.resource_record_name, count.index)
+  type    = element(aws_acm_certificate.acm_certificate.domain_validation_options.*.resource_record_type, count.index)
+  records = [element(aws_acm_certificate.acm_certificate.domain_validation_options.*.resource_record_value, count.index)]
   ttl     = 60
+}
+
+resource "aws_route53_record" "attach_lb" {
+  zone_id = data.aws_route53_zone.private_zone.zone_id
+  name    = "dribble-getup.online"
+  type    = "A"
+  alias {
+    name                   = aws_lb.aws_alb.dns_name
+    zone_id                = aws_lb.aws_alb.zone_id
+    evaluate_target_health = true
+  }
 }
 
 
 resource "aws_acm_certificate_validation" "acm_certificate_validation" {
-  certificate_arn = aws_acm_certificate.my_acm_certificate.arn
+  certificate_arn = aws_acm_certificate.acm_certificate.arn
   validation_record_fqdns = aws_route53_record.cert-validations.*.fqdn
 }
 output "private_key" {
-  value     = tls_private_key.my_key.private_key_pem
+  value     = tls_private_key.key.private_key_pem
   sensitive = true
 }
