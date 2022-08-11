@@ -1,5 +1,5 @@
 Status of Last Build:<br>
-<img src="https://github.com/CI-CD-pipeline-for-website-using-AWS-EC2-and-Github-Actions/workflows/Publish Website/badge.svg?branch-main"><br>
+<img src="https://github.com/mastermole0310/CI-CD-pipeline-for-website-using-AWS-EC2-and-Github-Actions/workflows/Publish Website/badge.svg?branch-main"><br>
 
 ## ==ТРЕБОВАНИЯ к вашему компьютеру (localhost)==
 - ОС Windows 7, 10, MacOS, Linux
